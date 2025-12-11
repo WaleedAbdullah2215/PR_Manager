@@ -15,6 +15,7 @@ app.use(cors({
     'http://localhost:3000',
     'http://localhost:3001', 
     'http://localhost:3002',
+    'https://pr-manager-frontend.vercel.app',
     'https://*.vercel.app',
     'https://*.railway.app',
     /\.vercel\.app$/,
