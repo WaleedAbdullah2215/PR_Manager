@@ -10,11 +10,14 @@ const app = express();
 
 // Middleware - CORS MUST come before routes
 app.use(cors({
-  origin: ['http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
     'http://localhost:3001', 
     'http://localhost:3002',
-    'https://*.vercel.app',  
-    /\.vercel\.app$/         
+    'https://*.vercel.app',
+    'https://*.railway.app',
+    /\.vercel\.app$/,
+    /\.railway\.app$/
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
