@@ -73,7 +73,6 @@ const prSchema = new mongoose.Schema(
   }
 );
 
-// Create indexes for faster queries
 prSchema.index({ id: 1 });
 prSchema.index({ status: 1 });
 prSchema.index({ priority: 1 });

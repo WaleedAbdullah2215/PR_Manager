@@ -1,8 +1,5 @@
 const Activity = require('../models/Activity');
 
-// @desc    Get all activities
-// @route   GET /api/activities
-// @access  Public
 exports.getAllActivities = async (req, res) => {
   try {
     const { limit = 50, prId } = req.query;
@@ -30,9 +27,6 @@ exports.getAllActivities = async (req, res) => {
   }
 };
 
-// @desc    Create activity
-// @route   POST /api/activities
-// @access  Public
 exports.createActivity = async (req, res) => {
   try {
     const { action, details, prId } = req.body;
@@ -56,9 +50,6 @@ exports.createActivity = async (req, res) => {
   }
 };
 
-// @desc    Delete old activities
-// @route   DELETE /api/activities/cleanup
-// @access  Public
 exports.cleanupActivities = async (req, res) => {
   try {
     const { days = 30 } = req.query;

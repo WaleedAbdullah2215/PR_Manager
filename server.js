@@ -9,7 +9,6 @@ if (process.env.NODE_ENV !== "production") {
 
 const app = express();
 
-// Middleware - CORS MUST come before routes
 app.use(cors({
   origin: [
     'http://localhost:3000',
@@ -29,17 +28,14 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Logging middleware - FIXED: Changed backticks to parentheses
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
 });
 
-// Routes
 app.use('/api/prs', require('./routes/prRoutes'));
 app.use('/api/activities', require('./routes/activityRoutes'));
 
-// Root route
 app.get('/', (req, res) => {
   res.json({
     message: 'PR Flow Manager API',
@@ -52,7 +48,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -61,7 +56,6 @@ app.use((req, res) => {
   });
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
   res.status(500).json({
@@ -73,9 +67,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5001;
 
-// Start server FIRST, then connect to DB
 app.listen(PORT, () => {
-  // FIXED: Changed all backticks to parentheses with template literals inside
   console.log(`\n🚀 Server running on port ${PORT}`);
   console.log(`📍 API URL: http://localhost:${PORT}`);
   console.log(`🔗 Endpoints:`);
@@ -83,6 +75,5 @@ app.listen(PORT, () => {
   console.log(`   - Activities: http://localhost:${PORT}/api/activities`);
   console.log(`\n✨ Ready to handle requests!\n`);
   
-  // Connect to database after server starts
   connectDB();
 });

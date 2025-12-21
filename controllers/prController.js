@@ -1,7 +1,6 @@
 const PR = require('../models/Procurement');
 const Activity = require('../models/Activity');
 
-// Get initial steps template
 const getInitialSteps = () => [
   { id: 1, name: 'Request Prepared', description: 'Draft PR details', completed: false, completedAt: null },
   { id: 2, name: 'HOD Approval', description: 'Department head approval', completed: false, completedAt: null },
@@ -17,14 +16,10 @@ const getInitialSteps = () => [
   { id: 12, name: 'Delivery Verified', description: 'Delivery verified & GRN created', completed: false, completedAt: null },
 ];
 
-// @desc    Get all PRs
-// @route   GET /api/prs
-// @access  Public
 exports.getAllPRs = async (req, res) => {
   try {
     const { status, priority, category, search, sortBy = 'createdAt', order = 'desc' } = req.query;
 
-    // Build query
     let query = {};
 
     if (status && status !== 'all') {
@@ -47,7 +42,6 @@ exports.getAllPRs = async (req, res) => {
       ];
     }
 
-    // Sort
     const sortOrder = order === 'desc' ? -1 : 1;
     const sortOptions = { [sortBy]: sortOrder };
 
@@ -67,9 +61,6 @@ exports.getAllPRs = async (req, res) => {
   }
 };
 
-// @desc    Get single PR by ID
-// @route   GET /api/prs/:id
-// @access  Public
 exports.getPRById = async (req, res) => {
   try {
     const pr = await PR.findOne({ id: req.params.id });
@@ -94,14 +85,10 @@ exports.getPRById = async (req, res) => {
   }
 };
 
-// @desc    Create new PR
-// @route   POST /api/prs
-// @access  Public
 exports.createPR = async (req, res) => {
   try {
     const { id, title, description, priority, category, dueDate } = req.body;
 
-    // Check if PR with same ID exists
     const existingPR = await PR.findOne({ id });
     if (existingPR) {
       return res.status(400).json({
@@ -110,7 +97,6 @@ exports.createPR = async (req, res) => {
       });
     }
 
-    // Create PR with initial steps
     const pr = await PR.create({
       id,
       title,
@@ -123,7 +109,6 @@ exports.createPR = async (req, res) => {
       status: 'in-progress',
     });
 
-    // Log activity
     await Activity.create({
       action: 'Created PR',
       details: `PR ${id}: ${title}`,
@@ -144,9 +129,7 @@ exports.createPR = async (req, res) => {
   }
 };
 
-// @desc    Update PR
-// @route   PUT /api/prs/:id
-// @access  Public
+
 exports.updatePR = async (req, res) => {
   try {
     const { title, description, priority, category, dueDate, status } = req.body;
@@ -160,7 +143,6 @@ exports.updatePR = async (req, res) => {
       });
     }
 
-    // Update fields
     if (title) pr.title = title;
     if (description !== undefined) pr.description = description;
     if (priority) pr.priority = priority;
@@ -170,7 +152,6 @@ exports.updatePR = async (req, res) => {
 
     await pr.save();
 
-    // Log activity
     await Activity.create({
       action: 'Updated PR',
       details: `PR ${req.params.id}: ${title || 'details updated'}`,
@@ -191,9 +172,6 @@ exports.updatePR = async (req, res) => {
   }
 };
 
-// @desc    Update PR step
-// @route   PUT /api/prs/:id/steps/:stepId
-// @access  Public
 exports.updatePRStep = async (req, res) => {
   try {
     const { completed, comment } = req.body;
@@ -217,7 +195,6 @@ exports.updatePRStep = async (req, res) => {
       });
     }
 
-    // Check if previous steps are completed
     if (completed && stepIndex > 0) {
       const prevSteps = pr.steps.slice(0, stepIndex);
       const allPrevCompleted = prevSteps.every(s => s.completed);
@@ -230,12 +207,10 @@ exports.updatePRStep = async (req, res) => {
       }
     }
 
-    // Update step
     pr.steps[stepIndex].completed = completed !== undefined ? completed : pr.steps[stepIndex].completed;
     pr.steps[stepIndex].comment = comment !== undefined ? comment : pr.steps[stepIndex].comment;
     pr.steps[stepIndex].completedAt = completed ? new Date() : null;
 
-    // Check if all steps are completed
     const allCompleted = pr.steps.every(s => s.completed);
     if (allCompleted) {
       pr.status = 'completed';
@@ -245,7 +220,6 @@ exports.updatePRStep = async (req, res) => {
 
     await pr.save();
 
-    // Log activity if step was completed
     if (completed && completed !== pr.steps[stepIndex].completed) {
       await Activity.create({
         action: 'Completed Step',
@@ -268,9 +242,6 @@ exports.updatePRStep = async (req, res) => {
   }
 };
 
-// @desc    Delete PR
-// @route   DELETE /api/prs/:id
-// @access  Public
 exports.deletePR = async (req, res) => {
   try {
     const pr = await PR.findOneAndDelete({ id: req.params.id });
@@ -282,7 +253,6 @@ exports.deletePR = async (req, res) => {
       });
     }
 
-    // Log activity
     await Activity.create({
       action: 'Deleted PR',
       details: `PR ${req.params.id} was removed`,
@@ -303,9 +273,6 @@ exports.deletePR = async (req, res) => {
   }
 };
 
-// @desc    Get PR statistics
-// @route   GET /api/prs/stats
-// @access  Public
 exports.getPRStats = async (req, res) => {
   try {
     const totalPRs = await PR.countDocuments();

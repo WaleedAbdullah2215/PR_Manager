@@ -24,7 +24,6 @@ const activitySchema = new mongoose.Schema(
   }
 );
 
-// Index for faster queries
 activitySchema.index({ timestamp: -1 });
 activitySchema.index({ prId: 1 });
 
