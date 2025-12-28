@@ -9,11 +9,12 @@ const getInitialSteps = () => [
   { id: 5, name: 'Supplier Extracted', description: 'Supplier list prepared', completed: false, completedAt: null },
   { id: 6, name: 'RFQs Sent', description: 'RFQs sent to suppliers', completed: false, completedAt: null },
   { id: 7, name: 'Quotations Received', description: 'Supplier quotations collected', completed: false, completedAt: null },
-  { id: 8, name: 'Comparison Report', description: 'Quotation comparison prepared', completed: false, completedAt: null },
+  { id: 8, name: 'Quotations Analysis', description: 'Analyze and compare quotations', completed: false, completedAt: null },
   { id: 9, name: 'Comparison Approved', description: 'Comparison approved by HOD', completed: false, completedAt: null },
-  { id: 10, name: 'PO Created', description: 'Purchase Order issued', completed: false, completedAt: null },
-  { id: 11, name: 'Delivery Received', description: 'Items received from supplier', completed: false, completedAt: null },
-  { id: 12, name: 'Delivery Verified', description: 'Delivery verified & GRN created', completed: false, completedAt: null },
+  { id: 10, name: 'Approved to Order', description: 'Order approved by higher authorities', completed: false, completedAt: null },
+  { id: 11, name: 'PO Created', description: 'Purchase Order issued', completed: false, completedAt: null },
+  { id: 12, name: 'Delivery Received', description: 'Items received from supplier', completed: false, completedAt: null },
+  { id: 13, name: 'GRN Created', description: 'Goods Receipt Note created', completed: false, completedAt: null },
 ];
 
 exports.getAllPRs = async (req, res) => {
@@ -195,6 +196,7 @@ exports.updatePRStep = async (req, res) => {
       });
     }
 
+    // Check if previous steps are completed (for consecutive activity)
     if (completed && stepIndex > 0) {
       const prevSteps = pr.steps.slice(0, stepIndex);
       const allPrevCompleted = prevSteps.every(s => s.completed);
@@ -207,10 +209,13 @@ exports.updatePRStep = async (req, res) => {
       }
     }
 
+    const wasCompleted = pr.steps[stepIndex].completed;
+    
     pr.steps[stepIndex].completed = completed !== undefined ? completed : pr.steps[stepIndex].completed;
     pr.steps[stepIndex].comment = comment !== undefined ? comment : pr.steps[stepIndex].comment;
     pr.steps[stepIndex].completedAt = completed ? new Date() : null;
 
+    // Update PR status based on completion
     const allCompleted = pr.steps.every(s => s.completed);
     if (allCompleted) {
       pr.status = 'completed';
@@ -220,10 +225,14 @@ exports.updatePRStep = async (req, res) => {
 
     await pr.save();
 
-    if (completed && completed !== pr.steps[stepIndex].completed) {
+    // Log activity for step completion/update
+    if (completed !== undefined && completed !== wasCompleted) {
+      const action = completed ? 'Completed Step' : 'Reopened Step';
+      const stepName = pr.steps[stepIndex].name;
+      
       await Activity.create({
-        action: 'Completed Step',
-        details: `PR ${id}: ${pr.steps[stepIndex].name}`,
+        action,
+        details: `PR ${id}: ${stepName}${comment ? ` - ${comment}` : ''}`,
         prId: id,
       });
     }
