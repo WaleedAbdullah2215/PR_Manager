@@ -68,9 +68,9 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on port ${PORT}`);
-  console.log(`📍 API URL: http://localhost:${PORT}`);
-  console.log(`🔗 Endpoints:`);
+  console.log(`\nCongrats, Server running on port ${PORT}`);
+  console.log(`API URL: http://localhost:${PORT}`);
+  console.log(`The Endpoints are:`);
   console.log(`   - PRs: http://localhost:${PORT}/api/prs`);
   console.log(`   - Activities: http://localhost:${PORT}/api/activities`);
   console.log(`\n✨ Ready to handle requests!\n`);

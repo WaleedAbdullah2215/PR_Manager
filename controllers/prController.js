@@ -196,7 +196,7 @@ exports.updatePRStep = async (req, res) => {
       });
     }
 
-    // Check if previous steps are completed (for consecutive activity)
+    //check fro preeviosus steps if completed or not
     if (completed && stepIndex > 0) {
       const prevSteps = pr.steps.slice(0, stepIndex);
       const allPrevCompleted = prevSteps.every(s => s.completed);
@@ -215,7 +215,7 @@ exports.updatePRStep = async (req, res) => {
     pr.steps[stepIndex].comment = comment !== undefined ? comment : pr.steps[stepIndex].comment;
     pr.steps[stepIndex].completedAt = completed ? new Date() : null;
 
-    // Update PR status based on completion
+    //Update PR status based on completion
     const allCompleted = pr.steps.every(s => s.completed);
     if (allCompleted) {
       pr.status = 'completed';
@@ -225,7 +225,6 @@ exports.updatePRStep = async (req, res) => {
 
     await pr.save();
 
-    // Log activity for step completion/update
     if (completed !== undefined && completed !== wasCompleted) {
       const action = completed ? 'Completed Step' : 'Reopened Step';
       const stepName = pr.steps[stepIndex].name;

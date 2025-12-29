@@ -10,7 +10,6 @@ const {
   getPRStats,
 } = require('../controllers/prController');
 
-// PR routes
 router.route('/').get(getAllPRs).post(createPR);
 
 router.route('/stats').get(getPRStats);
