@@ -2,7 +2,10 @@ const Activity = require('../models/Activity');
 
 exports.getAllActivities = async (req, res) => {
   try {
-    const { limit = 50, prId } = req.query;
+    const { limit = 50, prId, page = 1 } = req.query;
+    const limitNum = parseInt(limit);
+    const pageNum = parseInt(page);
+    const skip = (pageNum - 1) * limitNum;
 
     let query = {};
     if (prId) {
@@ -11,11 +14,17 @@ exports.getAllActivities = async (req, res) => {
 
     const activities = await Activity.find(query)
       .sort({ timestamp: -1 })
-      .limit(parseInt(limit));
+      .skip(skip)
+      .limit(limitNum);
+
+    const totalCount = await Activity.countDocuments(query);
 
     res.status(200).json({
       success: true,
       count: activities.length,
+      totalCount,
+      currentPage: pageNum,
+      totalPages: Math.ceil(totalCount / limitNum),
       data: activities,
     });
   } catch (error) {
