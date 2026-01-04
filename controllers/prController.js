@@ -2,9 +2,9 @@ const PR = require('../models/Procurement');
 const Activity = require('../models/Activity');
 
 const getInitialSteps = () => [
-  { id: 1, name: 'Request Prepared', description: 'Draft PR details', completed: false, completedAt: null },
-  { id: 2, name: 'HOD Approval', description: 'Department head approval', completed: false, completedAt: null },
-  { id: 3, name: 'Purchase Approval', description: 'Purchase department review', completed: false, completedAt: null },
+  { id: 1, name: 'Request Prepared', description: 'Draft PR details', completed: true, completedAt: new Date() },
+  { id: 2, name: 'HOD Approval', description: 'Department head approval', completed: true, completedAt: new Date() },
+  { id: 3, name: 'Purchase Approval', description: 'Purchase department review', completed: true, completedAt: new Date() },
   { id: 4, name: 'RFQ Generated', description: 'Request for Quotation created', completed: false, completedAt: null },
   { id: 5, name: 'Supplier Extracted', description: 'Supplier list prepared', completed: false, completedAt: null },
   { id: 6, name: 'RFQs Sent', description: 'RFQs sent to suppliers', completed: false, completedAt: null },
@@ -88,7 +88,7 @@ exports.getPRById = async (req, res) => {
 
 exports.createPR = async (req, res) => {
   try {
-    const { id, title, description, priority, category, dueDate } = req.body;
+    const { id, title, description, rfqNumber, priority, category, dueDate } = req.body;
 
     const existingPR = await PR.findOne({ id });
     if (existingPR) {
@@ -102,8 +102,9 @@ exports.createPR = async (req, res) => {
       id,
       title,
       description,
+      rfqNumber: rfqNumber || '',
       priority: priority || 'medium',
-      category: category || 'Office',
+      category: category || 'Others',
       assignee: 'Mohammad Amir Khan',
       dueDate: dueDate || null,
       steps: getInitialSteps(),
@@ -133,7 +134,7 @@ exports.createPR = async (req, res) => {
 
 exports.updatePR = async (req, res) => {
   try {
-    const { title, description, priority, category, dueDate, status } = req.body;
+    const { title, description, rfqNumber, priority, category, dueDate, status } = req.body;
 
     const pr = await PR.findOne({ id: req.params.id });
 
@@ -146,6 +147,7 @@ exports.updatePR = async (req, res) => {
 
     if (title) pr.title = title;
     if (description !== undefined) pr.description = description;
+    if (rfqNumber !== undefined) pr.rfqNumber = rfqNumber;
     if (priority) pr.priority = priority;
     if (category) pr.category = category;
     if (dueDate !== undefined) pr.dueDate = dueDate;

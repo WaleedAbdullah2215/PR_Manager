@@ -43,6 +43,11 @@ const prSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    rfqNumber: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     status: {
       type: String,
       enum: ['in-progress', 'completed'],
