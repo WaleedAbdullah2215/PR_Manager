@@ -105,7 +105,7 @@ exports.createPR = async (req, res) => {
       rfqNumber: rfqNumber || '',
       priority: priority || 'medium',
       category: category || 'Others',
-      assignee: 'Mohammad Amir Khan',
+      assignee: process.env.DEFAULT_USER || 'Mohammad Amir Khan',
       dueDate: dueDate || null,
       steps: getInitialSteps(),
       status: 'in-progress',
