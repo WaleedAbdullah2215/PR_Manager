@@ -17,6 +17,34 @@ const getInitialSteps = () => [
   { id: 13, name: 'GRN Created', description: 'Goods Receipt Note created', completed: false, completedAt: null },
 ];
 
+// Migration function to update old PRs to new step structure
+const migrateSteps = (oldSteps) => {
+  const newSteps = getInitialSteps();
+  
+  // If already has 13 steps, just return as is
+  if (oldSteps.length === 13) {
+    return oldSteps;
+  }
+  
+  // Map old steps to new structure
+  const migratedSteps = newSteps.map((newStep, index) => {
+    const oldStep = oldSteps[index];
+    
+    if (oldStep) {
+      return {
+        ...newStep,
+        completed: oldStep.completed || false,
+        completedAt: oldStep.completedAt || null,
+        comment: oldStep.comment || ''
+      };
+    }
+    
+    return newStep;
+  });
+  
+  return migratedSteps;
+};
+
 exports.getAllPRs = async (req, res) => {
   try {
     const { status, priority, category, search, sortBy = 'createdAt', order = 'desc' } = req.query;
@@ -48,10 +76,17 @@ exports.getAllPRs = async (req, res) => {
 
     const prs = await PR.find(query).sort(sortOptions);
 
+    // Migrate old PRs to new step structure
+    const migratedPRs = prs.map(pr => {
+      const prObj = pr.toObject();
+      prObj.steps = migrateSteps(prObj.steps);
+      return prObj;
+    });
+
     res.status(200).json({
       success: true,
-      count: prs.length,
-      data: prs,
+      count: migratedPRs.length,
+      data: migratedPRs,
     });
   } catch (error) {
     res.status(500).json({
@@ -73,9 +108,13 @@ exports.getPRById = async (req, res) => {
       });
     }
 
+    // Migrate steps if needed
+    const prObj = pr.toObject();
+    prObj.steps = migrateSteps(prObj.steps);
+
     res.status(200).json({
       success: true,
-      data: pr,
+      data: prObj,
     });
   } catch (error) {
     res.status(500).json({
@@ -217,9 +256,11 @@ exports.updatePRStep = async (req, res) => {
     pr.steps[stepIndex].comment = comment !== undefined ? comment : pr.steps[stepIndex].comment;
     pr.steps[stepIndex].completedAt = completed ? new Date() : null;
 
-    //Update PR status based on completion
+    // Update PR status based on PO Created completion
+    const poCreatedStep = pr.steps.find(s => s.name === 'PO Created');
     const allCompleted = pr.steps.every(s => s.completed);
-    if (allCompleted) {
+    
+    if (allCompleted || (poCreatedStep && poCreatedStep.completed)) {
       pr.status = 'completed';
     } else {
       pr.status = 'in-progress';

@@ -60,7 +60,7 @@ const prSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['FM/Maintenance', 'Remote Areas', 'Marketing', 'Leasing', 'HR', 'IT', 'Finance', 'Consultancy', 'Others'],
+      enum: ['FM/Maintenance', 'Remote Areas', 'Marketing', 'Leasing', 'HR', 'IT', 'Finance', 'Consultancy', 'Office', 'Others'],
       default: 'Others',
     },
     assignee: {
